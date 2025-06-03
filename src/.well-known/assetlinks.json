@@ -1,0 +1,9 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+        "namespace": "android_app",
+        "package_name": "de.multamedio.lottoapp.ltsa",
+        "sha256_cert_fingerprints":
+        ["BF:DD:64:5C:93:6A:EE:BD:79:A9:91:D4:DC:49:55:6E:BE:89:A3:21:DE:DA:F5:F3:75:09:F2:29:5E:3B:57:C8"]
+    }
+}]
