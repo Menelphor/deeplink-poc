@@ -7,7 +7,7 @@
         ],
         "components": [
           {
-            "/": "/applinks*",
+            "/": "/applink*",
             "comment": "Matches the root path of the app"
           }
         ]
