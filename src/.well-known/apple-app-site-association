@@ -4,13 +4,8 @@
       {
         "appIDs": [
           "U2QM674Y33.de.lottosachsenanhalt.lottoltsa"
-        ],
-        "components": [
-          {
-            "/": "/applink*",
-            "comment": "Matches the root path of the app"
-          }
         ]
+        
       }
     ]
   }
