@@ -10,7 +10,7 @@
 //     }
 // }
 
-handleApplinkRewrite();
+// handleApplinkRewrite();
 
 document.addEventListener('DOMContentLoaded', () => {
     const messageElement = document.createElement('h1');
