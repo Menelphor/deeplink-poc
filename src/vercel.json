@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/applink/:path*", "destination": "/:path*" }
+    { "source": "/applink:path*", "destination": ":path*" }
   ]
 }
