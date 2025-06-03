@@ -8,20 +8,10 @@
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <button id="assetlinks-btn">View apple-app-site-association</button>
-    <button id="assetlinks-applink-btn">View assetlinks.json via /applink</button>
-    <button id="lotto-btn">Lotto Normalschein</button>
+    <a href="/.well-known/apple-app-site-association" id="assetlinks-btn">View apple-app-site-association</a>
+    <a href="/applink/.well-known/assetlinks.json" id="assetlinks-applink-btn">View assetlinks.json via /applink</a>
+    <a href="/applink/lotto6aus49/normalschein" id="lotto-btn">Lotto Normalschein</a>
+    <a href="/applink" id="lotto-btn">Applink</a>
     <script src="app.js"></script>
-    <script>
-      document.getElementById('assetlinks-btn').addEventListener('click', function() {
-        window.location.href = '/.well-known/apple-app-site-association';
-      });
-      document.getElementById('assetlinks-applink-btn').addEventListener('click', function() {
-        window.location.href = '/applink/.well-known/assetlinks.json';
-      });
-      document.getElementById('lotto-btn').addEventListener('click', function() {
-        window.location.href = '/applink/lotto6aus49/normalschein';
-      });
-    </script>
 </body>
 </html>
