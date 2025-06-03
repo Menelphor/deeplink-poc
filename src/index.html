@@ -8,12 +8,12 @@
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <button id="assetlinks-btn">View assetlinks.json</button>
+    <button id="assetlinks-btn">View apple-app-site-association</button>
     <button id="assetlinks-applink-btn">View assetlinks.json via /applink</button>
     <button id="lotto-btn">Lotto Normalschein</button>
     <script src="app.js"></script>
     <script>
-      document.getElementById('apple-app-site-association').addEventListener('click', function() {
+      document.getElementById('assetlinks-btn').addEventListener('click', function() {
         window.location.href = '/.well-known/apple-app-site-association';
       });
       document.getElementById('assetlinks-applink-btn').addEventListener('click', function() {
