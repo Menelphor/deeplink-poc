@@ -9,10 +9,14 @@
 <body>
     <h1>Hello, World!</h1>
     <button id="assetlinks-btn">View assetlinks.json</button>
+    <button id="assetlinks-applink-btn">View assetlinks.json via /applink</button>
     <script src="app.js"></script>
     <script>
       document.getElementById('assetlinks-btn').addEventListener('click', function() {
         window.location.href = '/.well-known/assetlinks.json';
+      });
+      document.getElementById('assetlinks-applink-btn').addEventListener('click', function() {
+        window.location.href = '/applink/.well-known/assetlinks.json';
       });
     </script>
 </body>
