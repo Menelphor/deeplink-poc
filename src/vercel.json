@@ -1,5 +1,10 @@
 {
   "rewrites": [
+
+    {
+      "source": "/applink/lotto6aus49/normalschein",
+      "destination": "https://www.lotto-sachsen-anhalt.de/lotto6aus49/normalschein"
+    },
     {
       "source": "/applink/:path*",
       "destination": "/:path*"
