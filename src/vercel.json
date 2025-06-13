@@ -1,17 +1,4 @@
 {
   "cleanUrls": true,
-  "redirects": [
-    {
-      "source": "/:path*",
-      "destination": "https://abbate.de/:path*",
-      "permanent": true,
-      "has": [
-        {
-          "type": "host",
-          "value": "app.abbate.de"
-        }
-      ]
-    }
-  ],
   "rewrites": []
 }
