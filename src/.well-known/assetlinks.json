@@ -1,9 +1,14 @@
-[{
-    "relation": ["delegate_permission/common.handle_all_urls"],
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
-        "namespace": "android_app",
-        "package_name": "de.multamedio.lottoapp.ltsa",
-        "sha256_cert_fingerprints":
-        ["BF:DD:64:5C:93:6A:EE:BD:79:A9:91:D4:DC:49:55:6E:BE:89:A3:21:DE:DA:F5:F3:75:09:F2:29:5E:3B:57:C8"]
+      "namespace": "android_app",
+      "package_name": "de.lottobw.app",
+      "sha256_cert_fingerprints": [
+        "A0:C7:3C:FF:27:01:02:08:7F:E8:ED:09:23:84:9C:A3:68:18:E4:86:BC:DC:E5:C9:CD:C4:2B:74:13:FE:0B:9D"
+      ]
     }
-}]
+  }
+]

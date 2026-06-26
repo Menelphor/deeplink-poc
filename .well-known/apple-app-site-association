@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "XXXXXXXXXX.de.lotterieservice.app",
+        "paths": ["/*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["XXXXXXXXXX.de.lotterieservice.app"]
+  }
+}

@@ -7,14 +7,30 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <h1>Lotterieservice Deep Link POC</h1>
     <div class="container">
-        <div><a href="https://abbate.de/.well-known/apple-app-site-association">View apple-app-site-association</a></div>
-        <div><a href="https://abbate.de/.well-known/assetlinks.json"> View assetlinks.json </a></div>
-        <div><a href="https://app.abbate.de/lotto6aus49/normalschein">https://app.abbate.de/lotto6aus49/normalschein</a></div>
-        <div><a href="https://abbate.de/lotto6aus49/normalschein">https://abbate.de/lotto6aus49/normalschein</a></div>
-        <div><a href="https://app.abbate.de/faq">https://app.abbate.de/faq</a></div>
-        <div><a href="https://abbate.de/faq">https://abbate.de/faq</a></div>
+        <h2>Test Links</h2>
+        <p class="info">Hinweis: Deeplink-Handler wird nur auf mobilen Geräten aktiviert</p>
+        
+        <h3>App Links (app.lotterieservice.de) - Trigger Deeplink Handler:</h3>
+        <div><a href="https://app.lotterieservice.de/lotto6aus49/normalschein">🎱 App: Lotto 6 aus 49 (Normalschein)</a></div>
+        <div><a href="https://app.lotterieservice.de/faq">❓ App: FAQ</a></div>
+        
+        <h3>Website Links (lotterieservice.de) - Quellseite für Deeplinks:</h3>
+        <div><a href="https://lotterieservice.de/lotto6aus49/normalschein">🌐 Website: Lotto 6 aus 49 (Normalschein)</a></div>
+        <div><a href="https://lotterieservice.de/faq">🌐 Website: FAQ</a></div>
+        
+        <h3>Browser Links (lotterieservice.de) - Browser-Fallback:</h3>
+        <div><a href="https://lotterieservice.de/lotto6aus49/normalschein">🌐 Browser: Lotto 6 aus 49</a></div>
+        <div><a href="https://lotterieservice.de/faq">🌐 Browser: FAQ</a></div>
+        
+        <h3>SSL Configuration Links:</h3>
+        <div><a href="https://lotterieservice.de/.well-known/apple-app-site-association">🔗 Website: apple-app-site-association</a></div>
+        <div><a href="https://app.lotterieservice.de/.well-known/apple-app-site-association">🔗 App: apple-app-site-association</a></div>
+        <div><a href="https://lotterieservice.de/.well-known/assetlinks.json">🔗 Website: assetlinks.json</a></div>
+        <div><a href="https://app.lotterieservice.de/.well-known/assetlinks.json">🔗 App: assetlinks.json</a></div>
     </div>
+    
+    <script src="app.js"></script>
 </body>
 </html>

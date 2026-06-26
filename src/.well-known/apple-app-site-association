@@ -3,7 +3,161 @@
     "details": [
       {
         "appIDs": [
-          "U2QM674Y33.de.lottosachsenanhalt.lottoltsa"
+          "W9PS89U68K.de.lottobadenwuerttemberg.lottobw"
+        ],
+        "components": [
+          {
+            "/": "/"
+          },
+          {
+            "/": "/datenschutz*"
+          },
+          {
+            "/": "/eurojackpot*"
+          },
+          {
+            "/": "/eurojackpot/normalschein*"
+          },
+          {
+            "/": "/eurojackpot/systemschein*"
+          },
+          {
+            "/": "/eurojackpot/team-tipp*"
+          },
+          {
+            "/": "/gaminghistory*"
+          },
+          {
+            "/": "/gewinnanfrage*"
+          },
+          {
+            "/": "/gluecksspirale*"
+          },
+          {
+            "/": "/gluecksspirale/spielschein*"
+          },
+          {
+            "/": "/gluecksspirale/jahreslos*"
+          },
+          {
+            "/": "/home*"
+          },
+          {
+            "/": "/impressum*"
+          },
+          {
+            "/": "/jugend-und-spielerschutz*"
+          },
+          {
+            "/": "/keno/spielschein*"
+          },
+          {
+            "/": "/lose/uebersicht*",
+            "?": "segmenttab=2",
+            "exclude": true
+          },
+          {
+            "/": "/lose/uebersicht*"
+          },
+          {
+            "/": "/lotto/normalschein*"
+          },
+          {
+            "/": "/lotto/systemschein*"
+          },
+          {
+            "/": "/lotto/system-anteile*"
+          },
+          {
+            "/": "/mein-konto/dashboard*"
+          },
+          {
+            "/": "/mein-konto/lotterien/dauer-klix-jackpot-jaeger*"
+          },
+          {
+            "/": "/mein-konto/lotterien/gespeicherte-spielscheine*"
+          },
+          {
+            "/": "/mein-konto/einstellungen"
+          },
+          {
+            "/": "/mein-konto/einstellungen/limits-verwalten*"
+          },
+          {
+            "/": "/mein-konto/lotterien/abos*"
+          },
+          {
+            "/": "/mein-konto/lotterien/kundenkarte*"
+          },
+          {
+            "/": "/mein-konto/lotterien/spielauftraege*"
+          },
+          {
+            "/": "/mein-konto/profil/uebersicht*"
+          },
+          {
+            "/": "/service/annahmestellensuche*"
+          },
+          {
+            "/": "/service/appinfos*"
+          },
+          {
+            "/": "/service/teilnahmebedingungen*"
+          },
+          {
+            "/": "/silvester-millionen/spielschein*"
+          },
+          {
+            "/": "/silvester-millionen/gewinnanfrage*"
+          },
+          {
+            "/": "/silvester-millionen/gewinnliste*"
+          },
+          {
+            "/": "/tippgemeinschaften*"
+          },
+          {
+            "/": "/toto/normalschein*"
+          },
+          {
+            "/": "/toto/systemschein*"
+          },
+          {
+            "/": "/toto/ergebnisse-quoten*"
+          },
+          {
+            "/": "/toto-auswahltipp/normalschein*"
+          },
+          {
+            "/": "/toto-auswahltipp/systemschein*"
+          },
+          {
+            "/": "/toto-13er-ergebniswette*"
+          },
+          {
+            "/": "/toto-13er-ergebniswette/normalschein*"
+          },
+          {
+            "/": "/toto-13er-ergebniswette/systemschein*"
+          },
+          {
+            "/": "/toto-13er-ergebniswette/ergebnisse-quoten*"
+          },
+          {
+            "/": "/toto-6aus45-auswahlwette/normalschein*"
+          },
+          {
+            "/": "/toto-6aus45-auswahlwette/systemschein*"
+          },
+          {
+            "/": "/ziehungen*"
+          },
+          {
+            "/": "/ziehungen/silvestermillionen*"
+          },
+          {
+            "/": "/ziehungen/sonderauslosungen*"
+          }
         ]
       }
     ]
