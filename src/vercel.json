@@ -2,7 +2,7 @@
   "cleanUrls": true,
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/.well-known/:path*",
       "destination": "https://lotterieservice.de/:path*",
       "permanent": true,
       "has": [
