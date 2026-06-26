@@ -19,7 +19,7 @@ class DeeplinkHandler {
      */
     init() {
         // Nur auf mobilen Geräten und wenn von der Website aufgerufen
-        if (!this.isMobileDevice()) {
+        if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
             return;
         }
 
@@ -29,11 +29,20 @@ class DeeplinkHandler {
         
         // Überprüfe ob die URL ein Deeplink Trigger ist
         // Unterstützt: app.lotterieservice.de als Deeplink-Ziel und lotterieservice.de als Quellseite
+        // Für lokales Debugging sind localhost und 127.0.0.1 ebenfalls erlaubt.
         const isDeeplinkDomain = currentHostname === 'app.lotterieservice.de' || 
-                     currentHostname === 'lotterieservice.de';
+                 currentHostname === 'lotterieservice.de' ||
+                 currentHostname === 'localhost' ||
+                 currentHostname === '127.0.0.1';
         
+        this.setupLinkHandlers();
+
         if (!isDeeplinkDomain) {
             console.log('Deeplink Handler: Domain ist kein Deeplink Trigger', currentHostname);
+            return;
+        }
+
+        if (currentPath === '/') {
             return;
         }
 
@@ -46,6 +55,29 @@ class DeeplinkHandler {
 
         // Versuche den Deeplink zu öffnen
         this.handleDeeplink(currentPath);
+    }
+
+    /**
+     * Registriert Klick-Handler für Deeplink-Links
+     */
+    setupLinkHandlers() {
+        document.addEventListener('click', (event) => {
+            const anchor = event.target.closest('a');
+
+            if (!anchor || !anchor.href) {
+                return;
+            }
+
+            const url = new URL(anchor.href, window.location.href);
+            const isAppLink = url.hostname === 'app.lotterieservice.de';
+
+            if (!isAppLink) {
+                return;
+            }
+
+            event.preventDefault();
+            this.handleDeeplink(url.pathname);
+        });
     }
 
     /**
@@ -69,6 +101,14 @@ class DeeplinkHandler {
      */
     isAndroid() {
         return /Android/.test(navigator.userAgent);
+    }
+
+    /**
+     * Prüft, ob wir auf einem lokalen Debug-Host laufen
+     */
+    isLocalDebugHost() {
+        const currentHostname = window.location.hostname;
+        return currentHostname === 'localhost' || currentHostname === '127.0.0.1';
     }
 
     /**
