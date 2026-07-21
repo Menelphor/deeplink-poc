@@ -1,17 +1,30 @@
-export default function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(request) {
+    if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+            status: 405,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
 
-    const { level = 'info', event, data } = req.body || {};
+    let body = {};
+    try {
+        body = await request.json();
+    } catch (_) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    const { level = 'info', event, data } = body;
 
     const entry = {
         timestamp: new Date().toISOString(),
         level,
         event,
         data,
-        userAgent: req.headers['user-agent'] || null,
-        ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || null,
+        userAgent: request.headers.get('user-agent') || null,
+        ip: request.headers.get('x-forwarded-for') || null,
     };
 
     if (level === 'error') {
@@ -22,5 +35,8 @@ export default function handler(req, res) {
         console.log('[deeplink]', JSON.stringify(entry));
     }
 
-    return res.status(200).json({ ok: true });
+    return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+    });
 }
