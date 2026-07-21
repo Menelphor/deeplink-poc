@@ -7,11 +7,25 @@ class DeeplinkHandler {
     constructor() {
         this.COOKIE_NAME = 'deeplink_preference';
         this.COOKIE_EXPIRATION_DAYS = 30;
-        this.APP_TIMEOUT_MS = 1200; // Timeout für App-Weiterleitung
-        this.PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=de.tagesschau.mobilnewsapp'; // Beispiel
-        this.APP_STORE_URL = 'https://apps.apple.com/de/app/tagesschau/id326307276'; // Beispiel
+        this.APP_TIMEOUT_MS = 100; // Timeout für App-Weiterleitung
+        this.PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=de.lottobw.app'; // Beispiel
+        this.APP_STORE_URL = 'https://apps.apple.com/de/app/lotto-baden-w%C3%BCrttemberg/id903035939'; // Beispiel
         this.MODAL_ID = 'deeplink-modal';
         this.isDeferringOpen = false;
+    }
+
+    /**
+     * Sendet einen Log-Eintrag an die Vercel-Funktion /api/log
+     */
+    sendLog(event, data = {}, level = 'info') {
+        try {
+            fetch('/api/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ level, event, data }),
+                keepalive: true,
+            }).catch(() => { /* Logging-Fehler nie nach außen werfen */ });
+        } catch (_) { /* ignore */ }
     }
 
     /**
@@ -39,6 +53,7 @@ class DeeplinkHandler {
 
         if (!isDeeplinkDomain) {
             console.log('Deeplink Handler: Domain ist kein Deeplink Trigger', currentHostname);
+            this.sendLog('init.domain_skip', { hostname: currentHostname });
             return;
         }
 
@@ -49,6 +64,7 @@ class DeeplinkHandler {
         // Desktop: Weiterleitung zu lotterieservice.de
         if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
             console.log('Desktop redirect to lotterieservice.de', currentPath);
+            this.sendLog('init.desktop_redirect', { path: currentPath });
             window.location.href = `https://lotterieservice.de${currentPath}`;
             return;
         }
@@ -59,6 +75,7 @@ class DeeplinkHandler {
             hostname: currentHostname,
             isMobile: true
         });
+        this.sendLog('init.mobile', { path: currentPath, hostname: currentHostname });
 
         // Versuche den Deeplink zu öffnen
         this.handleDeeplink(currentPath);
@@ -140,12 +157,14 @@ class DeeplinkHandler {
         if (preference === 'browser') {
             // Nutzer möchte Browser verwenden
             console.log('User preference: browser');
+            this.sendLog('deeplink.preference', { preference: 'browser', path });
             return;
         }
 
         if (preference === 'skip') {
             // Nutzer hat Modal ignoriert/geschlossen
             console.log('User preference: skip modal');
+            this.sendLog('deeplink.preference', { preference: 'skip', path });
             return;
         }
 
@@ -161,10 +180,12 @@ class DeeplinkHandler {
         
         if (!deeplink) {
             console.log('Keine Deeplink möglich für Pfad:', path);
+            this.sendLog('deeplink.no_deeplink', { path }, 'warn');
             return;
         }
 
         console.log('Versuche Deeplink zu öffnen:', deeplink);
+        this.sendLog('deeplink.attempt', { deeplink, path });
 
         // Speichere den ursprünglichen Fokus
         const appAttemptTime = Date.now();
@@ -199,6 +220,7 @@ class DeeplinkHandler {
             // Überprüfe ob App tatsächlich nicht geöffnet wurde
             if (!appSwitchDetected && Date.now() - appAttemptTime >= this.APP_TIMEOUT_MS) {
                 console.log('App hat nicht geöffnet, zeige Modal');
+                this.sendLog('deeplink.app_not_opened', { path }, 'warn');
                 this.showModal(path);
             }
         }, this.APP_TIMEOUT_MS);
@@ -351,6 +373,7 @@ class DeeplinkHandler {
     handleDownloadApp() {
         // Speichere Entscheidung
         this.setCookie(this.COOKIE_NAME, 'app-store', this.COOKIE_EXPIRATION_DAYS);
+        this.sendLog('modal.download_app', { platform: this.isIOS() ? 'ios' : 'android' });
         
         // Leite zu App Store weiter
         if (this.isIOS()) {
@@ -368,6 +391,7 @@ class DeeplinkHandler {
     handleBrowserOpen(path) {
         // Speichere Entscheidung
         this.setCookie(this.COOKIE_NAME, 'browser', this.COOKIE_EXPIRATION_DAYS);
+        this.sendLog('modal.browser_open', { path });
         
         // Lade die Browser-Version der Seite
         window.location.href = `https://lotterieservice.de${path}`;
@@ -381,6 +405,7 @@ class DeeplinkHandler {
     handleSkip() {
         // Speichere Entscheidung
         this.setCookie(this.COOKIE_NAME, 'skip', this.COOKIE_EXPIRATION_DAYS);
+        this.sendLog('modal.skip');
         
         this.closeModal();
     }
