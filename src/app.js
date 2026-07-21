@@ -163,9 +163,10 @@ class DeeplinkHandler {
         }
 
         if (preference === 'skip') {
-            // Nutzer hat Modal ignoriert/geschlossen
+            // Nutzer hat Modal ignoriert/geschlossen → zur Browser-Version weiterleiten
             console.log('User preference: skip modal');
             this.sendLog('deeplink.preference', { preference: 'skip', path });
+            window.location.href = `https://lotterieservice.de${path}`;
             return;
         }
 
