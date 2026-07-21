@@ -155,9 +155,10 @@ class DeeplinkHandler {
         const preference = this.getCookie(this.COOKIE_NAME);
         
         if (preference === 'browser') {
-            // Nutzer möchte Browser verwenden
+            // Nutzer möchte Browser verwenden → direkt zur Browser-Version weiterleiten
             console.log('User preference: browser');
             this.sendLog('deeplink.preference', { preference: 'browser', path });
+            window.location.href = `https://lotterieservice.de${path}`;
             return;
         }
 
@@ -190,12 +191,23 @@ class DeeplinkHandler {
         // Speichere den ursprünglichen Fokus
         const appAttemptTime = Date.now();
         let appSwitchDetected = false;
+        let appSwitchConfirmTimer = null;
 
+        // iOS fires visibilitychange briefly when checking Universal Links (not a real app switch).
+        // Only treat it as a real switch if the page stays hidden for ≥ 800ms.
         const onVisibilityChange = () => {
             if (document.hidden) {
-                appSwitchDetected = true;
-                clearTimeout(fallbackTimer);
-                cleanupListeners();
+                appSwitchConfirmTimer = setTimeout(() => {
+                    appSwitchDetected = true;
+                    clearTimeout(fallbackTimer);
+                    cleanupListeners();
+                }, 800);
+            } else {
+                // Page came back visible quickly — iOS link check, not a real app switch
+                if (appSwitchConfirmTimer) {
+                    clearTimeout(appSwitchConfirmTimer);
+                    appSwitchConfirmTimer = null;
+                }
             }
         };
 
@@ -208,6 +220,10 @@ class DeeplinkHandler {
         const cleanupListeners = () => {
             document.removeEventListener('visibilitychange', onVisibilityChange);
             window.removeEventListener('pagehide', onPageHide);
+            if (appSwitchConfirmTimer) {
+                clearTimeout(appSwitchConfirmTimer);
+                appSwitchConfirmTimer = null;
+            }
         };
 
         document.addEventListener('visibilitychange', onVisibilityChange);
