@@ -1,30 +1,25 @@
-export default async function handler(request) {
-    if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-            status: 405,
-            headers: { 'Content-Type': 'application/json' },
-        });
+module.exports = function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
     }
 
-    let body = {};
-    try {
-        body = await request.json();
-    } catch (_) {
-        return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { level = 'info', event, data } = body;
+    const { level = 'info', event, data } = req.body || {};
 
     const entry = {
         timestamp: new Date().toISOString(),
         level,
         event,
         data,
-        userAgent: request.headers.get('user-agent') || null,
-        ip: request.headers.get('x-forwarded-for') || null,
+        userAgent: req.headers['user-agent'] || null,
+        ip: req.headers['x-forwarded-for'] || null,
     };
 
     if (level === 'error') {
@@ -35,8 +30,5 @@ export default async function handler(request) {
         console.log('[deeplink]', JSON.stringify(entry));
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-    });
-}
+    return res.status(200).json({ ok: true });
+};

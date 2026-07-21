@@ -1381,3 +1381,5 @@ node_modules/websocket-extensions/lib/pipeline/index.js
 node_modules/websocket-extensions/lib/pipeline/pledge.js
 node_modules/websocket-extensions/lib/pipeline/README.md
 node_modules/websocket-extensions/lib/pipeline/ring_buffer.js
+.vercel
+.env*
