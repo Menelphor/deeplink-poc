@@ -18,23 +18,23 @@ class DeeplinkHandler {
      * Initialisiert den Deeplink Handler
      */
     init() {
-        // Nur auf mobilen Geräten und wenn von der Website aufgerufen
-        if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
-            return;
-        }
-
         // Überprüfe die Seiten-URL
         const currentPath = window.location.pathname;
         const currentHostname = window.location.hostname;
-        
+
+        // .well-known Pfade niemals weiterleiten
+        if (currentPath.startsWith('/.well-known')) {
+            return;
+        }
+
         // Überprüfe ob die URL ein Deeplink Trigger ist
         // Unterstützt: app.lotterieservice.de als Deeplink-Ziel und lotterieservice.de als Quellseite
         // Für lokales Debugging sind localhost und 127.0.0.1 ebenfalls erlaubt.
-        const isDeeplinkDomain = currentHostname === 'app.lotterieservice.de' || 
+        const isDeeplinkDomain = currentHostname === 'app.lotterieservice.de' ||
                  currentHostname === 'lotterieservice.de' ||
                  currentHostname === 'localhost' ||
                  currentHostname === '127.0.0.1';
-        
+
         this.setupLinkHandlers();
 
         if (!isDeeplinkDomain) {
@@ -43,6 +43,13 @@ class DeeplinkHandler {
         }
 
         if (currentPath === '/') {
+            return;
+        }
+
+        // Desktop: Weiterleitung zu lotterieservice.de
+        if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
+            console.log('Desktop redirect to lotterieservice.de', currentPath);
+            window.location.href = `https://lotterieservice.de${currentPath}`;
             return;
         }
 
@@ -75,7 +82,19 @@ class DeeplinkHandler {
                 return;
             }
 
+            // .well-known Pfade niemals abfangen
+            if (url.pathname.startsWith('/.well-known')) {
+                return;
+            }
+
             event.preventDefault();
+
+            // Desktop: Weiterleitung zu lotterieservice.de
+            if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
+                window.location.href = `https://lotterieservice.de${url.pathname}`;
+                return;
+            }
+
             this.handleDeeplink(url.pathname);
         });
     }
