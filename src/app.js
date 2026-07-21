@@ -7,7 +7,7 @@ class DeeplinkHandler {
     constructor() {
         this.COOKIE_NAME = 'deeplink_preference';
         this.COOKIE_EXPIRATION_DAYS = 30;
-        this.APP_TIMEOUT_MS = 100; // Timeout für App-Weiterleitung
+        this.APP_TIMEOUT_MS = 1200; // Timeout für App-Weiterleitung
         this.PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=de.tagesschau.mobilnewsapp'; // Beispiel
         this.APP_STORE_URL = 'https://apps.apple.com/de/app/tagesschau/id326307276'; // Beispiel
         this.MODAL_ID = 'deeplink-modal';
@@ -149,46 +149,61 @@ class DeeplinkHandler {
 
         // Speichere den ursprünglichen Fokus
         const appAttemptTime = Date.now();
+        let appSwitchDetected = false;
+
+        const onVisibilityChange = () => {
+            if (document.hidden) {
+                appSwitchDetected = true;
+                clearTimeout(fallbackTimer);
+                cleanupListeners();
+            }
+        };
+
+        const onPageHide = () => {
+            appSwitchDetected = true;
+            clearTimeout(fallbackTimer);
+            cleanupListeners();
+        };
+
+        const cleanupListeners = () => {
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            window.removeEventListener('pagehide', onPageHide);
+        };
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.addEventListener('pagehide', onPageHide);
         
         // Setze ein Timer für den Fallback
         const fallbackTimer = setTimeout(() => {
+            cleanupListeners();
+
             // Überprüfe ob App tatsächlich nicht geöffnet wurde
-            if (Date.now() - appAttemptTime >= this.APP_TIMEOUT_MS) {
+            if (!appSwitchDetected && Date.now() - appAttemptTime >= this.APP_TIMEOUT_MS) {
                 console.log('App hat nicht geöffnet, zeige Modal');
                 this.showModal(path);
             }
         }, this.APP_TIMEOUT_MS);
 
-        // Versuche Deeplink zu öffnen
-        if (this.isIOS()) {
-            this.openIOSDeeplink(deeplink, fallbackTimer);
-        } else if (this.isAndroid()) {
-            this.openAndroidDeeplink(deeplink, fallbackTimer);
-        }
+        // Versuche Deeplink zu öffnen ohne aktuelle Seite zu verlassen.
+        this.openDeeplinkInHiddenFrame(deeplink);
     }
 
     /**
-     * Öffnet Deeplink auf iOS
+     * Öffnet Deeplink in verstecktem Frame, damit Fallback-Modal rendern kann
      */
-    openIOSDeeplink(deeplink, fallbackTimer) {
-        // Nutze Universal Links (wird durch apple-app-site-association definiert)
-        window.location.href = deeplink;
-    }
+    openDeeplinkInHiddenFrame(deeplink) {
+        const frame = document.createElement('iframe');
+        frame.style.display = 'none';
+        frame.setAttribute('aria-hidden', 'true');
+        frame.src = deeplink;
+        document.body.appendChild(frame);
 
-    /**
-     * Öffnet Deeplink auf Android
-     */
-    openAndroidDeeplink(deeplink, fallbackTimer) {
-        // Versuche Intent-URL für Android
-        const intent = this.buildAndroidIntent(deeplink);
-        
-        try {
-            // Versuche Intent zu öffnen
-            window.location.href = intent;
-        } catch (e) {
-            console.log('Intent fehlgeschlagen, versuche Standard-Deeplink');
-            window.location.href = deeplink;
-        }
+        // Aufräumen, um keine iframes anzusammeln.
+        setTimeout(() => {
+            if (frame.parentNode) {
+                frame.parentNode.removeChild(frame);
+            }
+        }, 1500);
     }
 
     /**

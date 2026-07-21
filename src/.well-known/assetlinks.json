@@ -7,7 +7,8 @@
       "namespace": "android_app",
       "package_name": "de.lottobw.app",
       "sha256_cert_fingerprints": [
-        "A0:C7:3C:FF:27:01:02:08:7F:E8:ED:09:23:84:9C:A3:68:18:E4:86:BC:DC:E5:C9:CD:C4:2B:74:13:FE:0B:9D"
+        "A0:C7:3C:FF:27:01:02:08:7F:E8:ED:09:23:84:9C:A3:68:18:E4:86:BC:DC:E5:C9:CD:C4:2B:74:13:FE:0B:9D",
+        "52:13:DD:9B:CC:1E:EE:CC:02:CF:94:6B:64:98:AB:75:B4:33:E5:98:46:9C:E9:63:19:8B:8B:98:91:19:54:0B"
       ]
     }
   }
