@@ -7,11 +7,9 @@ class DeeplinkHandler {
     constructor() {
         this.COOKIE_NAME = 'deeplink_preference';
         this.COOKIE_EXPIRATION_DAYS = 30;
-        this.APP_TIMEOUT_MS = 100; // Timeout für App-Weiterleitung
         this.PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=de.lottobw.app'; // Beispiel
         this.APP_STORE_URL = 'https://apps.apple.com/de/app/lotto-baden-w%C3%BCrttemberg/id903035939'; // Beispiel
         this.MODAL_ID = 'deeplink-modal';
-        this.isDeferringOpen = false;
     }
 
     /**
@@ -35,23 +33,16 @@ class DeeplinkHandler {
         // Überprüfe die Seiten-URL
         const currentPath = window.location.pathname;
         const currentHostname = window.location.hostname;
+        const isLocalDebugHost = this.isLocalDebugHost();
+        const isAppLandingHost = currentHostname === 'app.lotterieservice.de' || isLocalDebugHost;
+        const isWebsiteHost = currentHostname === 'lotterieservice.de';
 
         // .well-known Pfade niemals weiterleiten
         if (currentPath.startsWith('/.well-known')) {
             return;
         }
 
-        // Überprüfe ob die URL ein Deeplink Trigger ist
-        // Unterstützt: app.lotterieservice.de als Deeplink-Ziel und lotterieservice.de als Quellseite
-        // Für lokales Debugging sind localhost und 127.0.0.1 ebenfalls erlaubt.
-        const isDeeplinkDomain = currentHostname === 'app.lotterieservice.de' ||
-                 currentHostname === 'lotterieservice.de' ||
-                 currentHostname === 'localhost' ||
-                 currentHostname === '127.0.0.1';
-
-        this.setupLinkHandlers();
-
-        if (!isDeeplinkDomain) {
+        if (!isAppLandingHost && !isWebsiteHost) {
             console.log('Deeplink Handler: Domain ist kein Deeplink Trigger', currentHostname);
             this.sendLog('init.domain_skip', { hostname: currentHostname });
             return;
@@ -61,11 +52,19 @@ class DeeplinkHandler {
             return;
         }
 
-        // Desktop: Weiterleitung zu lotterieservice.de
-        if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
+        if (!this.isMobileDevice() && !isLocalDebugHost) {
+            if (!isAppLandingHost) {
+                return;
+            }
+
             console.log('Desktop redirect to lotterieservice.de', currentPath);
             this.sendLog('init.desktop_redirect', { path: currentPath });
             window.location.href = `https://lotterieservice.de${currentPath}`;
+            return;
+        }
+
+        if (!isAppLandingHost) {
+            this.sendLog('init.source_page', { path: currentPath, hostname: currentHostname });
             return;
         }
 
@@ -75,45 +74,10 @@ class DeeplinkHandler {
             hostname: currentHostname,
             isMobile: true
         });
-        this.sendLog('init.mobile', { path: currentPath, hostname: currentHostname });
+        this.sendLog('init.mobile_landing', { path: currentPath, hostname: currentHostname });
 
-        // Versuche den Deeplink zu öffnen
-        this.handleDeeplink(currentPath);
-    }
-
-    /**
-     * Registriert Klick-Handler für Deeplink-Links
-     */
-    setupLinkHandlers() {
-        document.addEventListener('click', (event) => {
-            const anchor = event.target.closest('a');
-
-            if (!anchor || !anchor.href) {
-                return;
-            }
-
-            const url = new URL(anchor.href, window.location.href);
-            const isAppLink = url.hostname === 'app.lotterieservice.de';
-
-            if (!isAppLink) {
-                return;
-            }
-
-            // .well-known Pfade niemals abfangen
-            if (url.pathname.startsWith('/.well-known')) {
-                return;
-            }
-
-            event.preventDefault();
-
-            // Desktop: Weiterleitung zu lotterieservice.de
-            if (!this.isMobileDevice() && !this.isLocalDebugHost()) {
-                window.location.href = `https://lotterieservice.de${url.pathname}`;
-                return;
-            }
-
-            this.handleDeeplink(url.pathname);
-        });
+        // Wenn diese Seite geladen wurde, hat die App den Universal Link nicht übernommen.
+        this.handleBrowserFallback(currentPath);
     }
 
     /**
@@ -150,7 +114,7 @@ class DeeplinkHandler {
     /**
      * Hauptfunktion zur Behandlung des Deeplinks
      */
-    handleDeeplink(path) {
+    handleBrowserFallback(path) {
         // Überprüfe ob der Nutzer bereits eine Entscheidung getroffen hat
         const preference = this.getCookie(this.COOKIE_NAME);
         
@@ -170,123 +134,8 @@ class DeeplinkHandler {
             return;
         }
 
-        // Versuche App zu öffnen
-        this.attemptAppDeeplink(path);
-    }
-
-    /**
-     * Versucht die App zu öffnen
-     */
-    attemptAppDeeplink(path) {
-        const deeplink = this.buildDeeplink(path);
-        
-        if (!deeplink) {
-            console.log('Keine Deeplink möglich für Pfad:', path);
-            this.sendLog('deeplink.no_deeplink', { path }, 'warn');
-            return;
-        }
-
-        console.log('Versuche Deeplink zu öffnen:', deeplink);
-        this.sendLog('deeplink.attempt', { deeplink, path });
-
-        // Speichere den ursprünglichen Fokus
-        const appAttemptTime = Date.now();
-        let appSwitchDetected = false;
-        let appSwitchConfirmTimer = null;
-
-        // iOS fires visibilitychange briefly when checking Universal Links (not a real app switch).
-        // Only treat it as a real switch if the page stays hidden for ≥ 800ms.
-        const onVisibilityChange = () => {
-            if (document.hidden) {
-                appSwitchConfirmTimer = setTimeout(() => {
-                    appSwitchDetected = true;
-                    clearTimeout(fallbackTimer);
-                    cleanupListeners();
-                }, 800);
-            } else {
-                // Page came back visible quickly — iOS link check, not a real app switch
-                if (appSwitchConfirmTimer) {
-                    clearTimeout(appSwitchConfirmTimer);
-                    appSwitchConfirmTimer = null;
-                }
-            }
-        };
-
-        const onPageHide = () => {
-            appSwitchDetected = true;
-            clearTimeout(fallbackTimer);
-            cleanupListeners();
-        };
-
-        const cleanupListeners = () => {
-            document.removeEventListener('visibilitychange', onVisibilityChange);
-            window.removeEventListener('pagehide', onPageHide);
-            if (appSwitchConfirmTimer) {
-                clearTimeout(appSwitchConfirmTimer);
-                appSwitchConfirmTimer = null;
-            }
-        };
-
-        document.addEventListener('visibilitychange', onVisibilityChange);
-        window.addEventListener('pagehide', onPageHide);
-        
-        // Setze ein Timer für den Fallback
-        const fallbackTimer = setTimeout(() => {
-            cleanupListeners();
-
-            // Überprüfe ob App tatsächlich nicht geöffnet wurde
-            if (!appSwitchDetected && Date.now() - appAttemptTime >= this.APP_TIMEOUT_MS) {
-                console.log('App hat nicht geöffnet, zeige Modal');
-                this.sendLog('deeplink.app_not_opened', { path }, 'warn');
-                this.showModal(path);
-            }
-        }, this.APP_TIMEOUT_MS);
-
-        // Versuche Deeplink zu öffnen ohne aktuelle Seite zu verlassen.
-        this.openDeeplinkInHiddenFrame(deeplink);
-    }
-
-    /**
-     * Öffnet Deeplink in verstecktem Frame, damit Fallback-Modal rendern kann
-     */
-    openDeeplinkInHiddenFrame(deeplink) {
-        const frame = document.createElement('iframe');
-        frame.style.display = 'none';
-        frame.setAttribute('aria-hidden', 'true');
-        frame.src = deeplink;
-        document.body.appendChild(frame);
-
-        // Aufräumen, um keine iframes anzusammeln.
-        setTimeout(() => {
-            if (frame.parentNode) {
-                frame.parentNode.removeChild(frame);
-            }
-        }, 1500);
-    }
-
-    /**
-     * Erstellt einen Android Intent
-     */
-    buildAndroidIntent(deeplink) {
-        // Android Intent Format
-        return `intent://${deeplink.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=de.lotterieservice;end`;
-    }
-
-    /**
-     * Erstellt den Deeplink aus dem aktuellen Pfad
-     */
-    buildDeeplink(path) {
-        // Der Deeplink wird über app.lotterieservice.de geöffnet
-        const deeplink = 'https://app.lotterieservice.de';
-        
-        // Entferne führenden Slash
-        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        
-        if (!cleanPath || cleanPath === '/') {
-            return null; // Keine Deeplink für Root-Pfad
-        }
-
-        return `${deeplink}/${cleanPath}`;
+        this.sendLog('deeplink.browser_landing', { path }, 'warn');
+        this.showModal(path);
     }
 
     /**
